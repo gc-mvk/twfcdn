@@ -5,3 +5,5 @@ https://gc-mvk.github.io/twfcdn/flags/
 
 https://gc-mvk.github.io/twfcdn/icons/
 
+https://gc-mvk.github.io/twfcdn/htmls/kabe-tr.html
+

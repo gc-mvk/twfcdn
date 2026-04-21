@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tawaf - Authentication Flow</title>
+    <style>
+        /* CSS Variables for easy theming */
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --background-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --success-color: #10b981;
+            --info-bg: #eff6ff;
+            --info-text: #1d4ed8;
+            --info-border: #bfdbfe;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .auth-container {
+            background-color: var(--card-bg);
+            padding: 2.5rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* View State Management */
+        .view-state {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-state.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .text-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-decoration: none;
+            background: none;
+            border: none;
+            padding: 0;
+            font-weight: 500;
+        }
+
+        .text-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Information Alert Styling */
+        .info-alert {
+            background-color: var(--info-bg);
+            color: var(--info-text);
+            border: 1px solid var(--info-border);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Modal Specific Styling */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            color: var(--success-color);
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+
+        .modal-content p {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .modal-content button {
+            background-color: var(--success-color);
+            margin-top: 0;
+        }
+
+        .modal-content button:hover {
+            background-color: #059669;
+        }
+
+        /* Specific styling for the Home screen */
+        #view-home {
+            padding: 2rem 0;
+        }
+        
+        #view-home h1 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">✓</div>
+            <p>Password has been changed successfully. Please login using your new password.</p>
+            <button type="button" onclick="closeModalAndLogin()">OK</button>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        
+        <div id="view-login" class="view-state active">
+            <h2>Tawaf Login</h2>
+            <form onsubmit="navigate(event, 'view-home')">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="Enter your username">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <button type="button" class="text-link" onclick="navigate(null, 'view-forgot')">Forgot Password?</button>
+        </div>
+
+        <div id="view-forgot" class="view-state">
+            <h2>Reset Password</h2>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Enter your email address to receive a recovery code.
+            </p>
+            <form onsubmit="navigate(event, 'view-reset')">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="name@example.com">
+                </div>
+                <button type="submit">Send my reset code</button>
+            </form>
+            <button type="button" class="text-link" onclick="navigate(null, 'view-login')">Back to Login</button>
+        </div>
+
+        <div id="view-reset" class="view-state">
+            <h2>Create New Password</h2>
+            
+            <div class="info-alert">
+                <span>ℹ️</span>
+                <span>The email field is hidden in this form.</span>
+            </div>
+
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Please enter the 6-digit code sent to your email.
+            </p>
+            
+            <form onsubmit="triggerModal(event)">
+                <input type="hidden" name="hidden-email" value="user@example.com">
+
+                <div class="input-group">
+                    <label for="reset-code">6-digit Reset Code</label>
+                    <input type="text" id="reset-code" required pattern="\d{6}" maxlength="6" placeholder="123456">
+                </div>
+                <div class="input-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required placeholder="Enter new password">
+                </div>
+                <button type="submit">Change My Password</button>
+            </form>
+        </div>
+
+        <div id="view-home" class="view-state">
+            <h1>Welcome</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">(Hoş geldiniz)</p>
+            <button type="button" class="text-link" onclick="navigate(null, 'view-login')" style="margin-top: 2rem;">Log Out Demo</button>
+        </div>
+
+    </div>
+
+    <script>
+        function navigate(event, targetViewId) {
+            if (event) event.preventDefault();
+
+            const views = document.querySelectorAll('.view-state');
+            views.forEach(view => view.classList.remove('active'));
+
+            const targetView = document.getElementById(targetViewId);
+            if (targetView) {
+                targetView.classList.add('active');
+                
+                if(targetViewId === 'view-login') {
+                    document.querySelectorAll('input:not([type="hidden"])').forEach(input => input.value = '');
+                }
+            }
+        }
+
+        function triggerModal(event) {
+            event.preventDefault(); 
+            document.getElementById('success-modal').classList.add('active');
+        }
+
+        function closeModalAndLogin() {
+            document.getElementById('success-modal').classList.remove('active');
+            navigate(null, 'view-login');
+        }
+    </script>
+</body>
+</html>
