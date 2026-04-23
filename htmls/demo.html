@@ -236,12 +236,12 @@
         <div id="view-forgot" class="view-state">
             <h2>Reset Password</h2>
             <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                Enter your email address to receive a recovery code.
+                Enter your username to receive a recovery code.
             </p>
             <form onsubmit="navigate(event, 'view-reset')">
                 <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required placeholder="name@example.com">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="username">
                 </div>
                 <button type="submit">Send my reset code</button>
             </form>
@@ -253,7 +253,7 @@
             
             <div class="info-alert">
                 <span>ℹ️</span>
-                <span>The email field is hidden in this form.</span>
+                <span>The username field is hidden in this form.</span>
             </div>
 
             <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
@@ -261,7 +261,7 @@
             </p>
             
             <form onsubmit="triggerModal(event)">
-                <input type="hidden" name="hidden-email" value="user@example.com">
+                <input type="hidden" name="hidden-username" value="myusername">
 
                 <div class="input-group">
                     <label for="reset-code">6-digit Reset Code</label>
